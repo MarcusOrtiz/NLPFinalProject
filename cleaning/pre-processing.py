@@ -1,12 +1,12 @@
 import pandas as pd
+import nltk
 import json
 from nltk.stem import PorterStemmer
-from nltk.stem import WordNetLemmatizer
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-import nltk
+from tensorflow.keras.preprocessing.text import Tokenizer
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
 
 # Load data from JSON file
 json_file_path = r"C:\Users\suimp\OneDrive\Desktop\Duke University\Class\2023-Fall\IDS 703 Introduction to Natural Language Processing\Final Project\NLPFinalProject\data\train_formatted_output.json"
