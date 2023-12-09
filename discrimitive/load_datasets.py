@@ -8,18 +8,22 @@ import json
 # load tokenizer
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
+
 def open_json(filename):
     with open(f'../data/{filename}', 'r') as file:
         return json.load(file)
 
+
 def tokenize(text):
     return tokenizer.tokenize(text)
+
 
 def build_vocab(text_iterable):
     counter = Counter()
     for text in text_iterable:
         counter.update(tokenize(text))
     return vocab(counter, specials=['<UNK>'])
+
 
 class QA_loader(Dataset):
     def __init__(self, data, vocab, max_length=100):
@@ -50,9 +54,3 @@ def load_datasets(train_filename, val_filename, test_filename):
     qa_train_dataset = QA_loader(train_data, vocab)
     qa_val_dataset = QA_loader(val_data, vocab)
     return qa_val_dataset, qa_train_dataset, vocab
-
-
-
-
-
-

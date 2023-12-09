@@ -1,4 +1,4 @@
-from .QA import QA
+from discrimitive.qa import QA
 
 
 def create_model(vocab_size):

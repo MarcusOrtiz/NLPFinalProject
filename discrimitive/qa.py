@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class QA(nn.Module):
     def __init__(self, input_dim, hidden_dim, hidden_layers, output_dim, vocab_size, embedding_dim):
         super(QA, self).__init__()
@@ -36,4 +37,3 @@ class QA(nn.Module):
         # Index hidden state of last time step
         out = self.fc(out[:, -1, :])
         return out
-
