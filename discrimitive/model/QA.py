@@ -5,7 +5,7 @@ class QA(nn.Module):
     def __init__(self, input_dim, hidden_dim, hidden_layers, output_dim, vocab_size, embedding_dim):
         super(QA, self).__init__()
         # Input Layer
-        self.embedding = nn.Embedding(self.vocab_size, self.embedding_dim)
+        self.embedding = nn.Embedding(vocab_size, embedding_dim)
 
         # Hidden Layer Dimensions
         self.hidden_dim = hidden_dim
@@ -16,9 +16,16 @@ class QA(nn.Module):
         # Output Layer
         self.fc = nn.Linear(self.hidden_dim * 2, output_dim)
 
-    def forward(self, x, question, answer):
+    def forward(self, question, answer):
+        print("check 1")
+        print("Question:", question[0:10])
+        print("Answer:", answer[0:10])
+        print("Question type:", question.dtype)
+        print("Answer type:", answer.dtype)
+        question
         question_emb = self.embedding(question)
         answer_emb = self.embedding(answer)
+        print("check 2")
 
         _, (question_hidden, _) = self.lstm(question_emb)
         _, (answer_hidden, _) = self.lstm(answer_emb)
