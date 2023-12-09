@@ -1,29 +1,41 @@
 import torch.nn as nn
 import torch.optim as optim
 import torch
-from pathlib import Path
-from load_datasets import load_datasets
-from specified_qa import create_model
+from .load_datasets import load_datasets
+from torch.nn.utils.rnn import pad_sequence
+from .qa import create_model
 from torch.utils.data import Dataset, DataLoader
 
-TRAIN_DATA_PATH = Path('./data/train_formatted_output.json').resolve()
-# TRAIN_DATA_PATH = Path('./data/train_marcus.json').resolve()
-VAL_DATA_PATH = Path('./data/valid_formatted_output.json').resolve()
-TEST_DATA_PATH = Path('./data/test_formatted_output.json').resolve()
+
+TRAIN_DATA_NAME = 'train_marcus.json'
+VAL_DATA_NAME = 'train_marcus.json'
+TEST_DATA_NAME = 'train_marcus.json'
+# TRAIN_DATA_NAME = 'train_formatted_output_w_comma.json'
+# VAL_DATA_NAME = 'valid_formatted_output_w_comma.json'
+# TEST_DATA_NAME = 'test_formatted_output_w_comma.json'
+
 BATCH_SIZE = 10
 SHUFFLE = True
 EPOCHS = 50
 LEARNING_RATE = 0.001
 
+def collate_batch(batch):
+    questions, answers, scores = zip(*batch)
 
+    # Pad questions and answers to have the same length within each batch
+    questions_padded = pad_sequence(questions, batch_first=True, padding_value=0)  # Assuming 0 is your padding index
+    answers_padded = pad_sequence(answers, batch_first=True, padding_value=0)
+    scores = torch.tensor(scores, dtype=torch.float)
+
+    return questions_padded, answers_padded, scores
 
 def train():
-    train_data, val_data, test_data, vocab = load_datasets(TRAIN_DATA_PATH, VAL_DATA_PATH, TEST_DATA_PATH)
+    train_data, val_data, test_data, vocab = load_datasets(TRAIN_DATA_NAME, VAL_DATA_NAME, TEST_DATA_NAME)
 
-    model = create_model(vocab)
+    model = create_model(len(vocab))
 
-    qa_train_loader = DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=SHUFFLE)
-    qa_val_loader = DataLoader(val_data, batch_size=BATCH_SIZE, shuffle=SHUFFLE)
+    qa_train_loader = DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=SHUFFLE, collate_fn=collate_batch)
+    qa_val_loader = DataLoader(val_data, batch_size=BATCH_SIZE, shuffle=SHUFFLE, collate_fn=collate_batch)
 
     # Define the loss function and optimizer
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
