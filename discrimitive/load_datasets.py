@@ -2,6 +2,7 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import BertTokenizer
 from torchtext.vocab import vocab
 from collections import Counter
+from pathlib import Path
 import torch
 import json
 
@@ -10,7 +11,7 @@ tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
 
 def open_json(filename):
-    with open(f'../data/{filename}', 'r') as file:
+    with open(Path(f'./data/{filename}').resolve(), 'r') as file:
         return json.load(file)
 
 
@@ -39,8 +40,8 @@ class QA_loader(Dataset):
         question_answer = self.data[idx]
         question = self.preprocess(question_answer['Question'])
         answer = self.preprocess(question_answer['Answer'])
-        rating = torch.tensor(question_answer['Rating'], dtype=torch.int)
-        return question, answer, rating
+        score = torch.tensor(int(question_answer['Score']), dtype=torch.int)
+        return question, answer, score
 
     def preprocess(self, text):
         tokens = self.tokenizer.tokenize(text)[:self.max_length]
@@ -53,4 +54,5 @@ def load_datasets(train_filename, val_filename, test_filename):
     vocab = build_vocab([item['Question'] for item in train_data] + [item['Answer'] for item in train_data])
     qa_train_dataset = QA_loader(train_data, vocab)
     qa_val_dataset = QA_loader(val_data, vocab)
-    return qa_val_dataset, qa_train_dataset, vocab
+    qa_test_dataset = QA_loader(test_data, vocab)
+    return qa_val_dataset, qa_train_dataset, qa_test_dataset, vocab

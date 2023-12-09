@@ -1,26 +1,25 @@
 import torch.nn as nn
 import torch.optim as optim
 import torch
-from pathlib import Path
-from load_datasets import load_datasets
-from specified_qa import create_model
+from .load_datasets import load_datasets
+from .qa import create_model
 from torch.utils.data import Dataset, DataLoader
 
-TRAIN_DATA_PATH = Path('./data/train_formatted_output.json').resolve()
-# TRAIN_DATA_PATH = Path('./data/train_marcus.json').resolve()
-VAL_DATA_PATH = Path('./data/valid_formatted_output.json').resolve()
-TEST_DATA_PATH = Path('./data/test_formatted_output.json').resolve()
+
+# TRAIN_DATA_NAME = 'train_formatted_output_w_comma.json'
+TRAIN_DATA_NAME = 'train_marcus.json'
+VAL_DATA_NAME = 'valid_formatted_output_w_comma.json'
+TEST_DATA_NAME = 'test_formatted_output_w_comma.json'
 BATCH_SIZE = 10
 SHUFFLE = True
 EPOCHS = 50
 LEARNING_RATE = 0.001
 
 
-
 def train():
-    train_data, val_data, test_data, vocab = load_datasets(TRAIN_DATA_PATH, VAL_DATA_PATH, TEST_DATA_PATH)
+    train_data, val_data, test_data, vocab = load_datasets(TRAIN_DATA_NAME, VAL_DATA_NAME, TEST_DATA_NAME)
 
-    model = create_model(vocab)
+    model = create_model(len(vocab))
 
     qa_train_loader = DataLoader(train_data, batch_size=BATCH_SIZE, shuffle=SHUFFLE)
     qa_val_loader = DataLoader(val_data, batch_size=BATCH_SIZE, shuffle=SHUFFLE)
