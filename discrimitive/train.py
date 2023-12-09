@@ -6,10 +6,13 @@ from .qa import create_model
 from torch.utils.data import Dataset, DataLoader
 
 
-# TRAIN_DATA_NAME = 'train_formatted_output_w_comma.json'
 TRAIN_DATA_NAME = 'train_marcus.json'
-VAL_DATA_NAME = 'valid_formatted_output_w_comma.json'
-TEST_DATA_NAME = 'test_formatted_output_w_comma.json'
+VAL_DATA_NAME = 'train_marcus.json'
+TEST_DATA_NAME = 'train_marcus.json'
+# TRAIN_DATA_NAME = 'train_formatted_output_w_comma.json'
+# VAL_DATA_NAME = 'valid_formatted_output_w_comma.json'
+# TEST_DATA_NAME = 'test_formatted_output_w_comma.json'
+
 BATCH_SIZE = 10
 SHUFFLE = True
 EPOCHS = 50

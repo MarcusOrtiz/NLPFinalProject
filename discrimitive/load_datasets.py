@@ -45,14 +45,14 @@ class QA_loader(Dataset):
 
     def preprocess(self, text):
         tokens = self.tokenizer.tokenize(text)[:self.max_length]
-        indices = [self.vocab[token] for token in tokens]
+        indices = [self.vocab[token] if token in self.vocab else self.vocab['<UNK>'] for token in tokens]
         return torch.tensor(indices, dtype=torch.long)
 
 
 def load_datasets(train_filename, val_filename, test_filename):
     train_data, val_data, test_data = open_json(train_filename), open_json(val_filename), open_json(test_filename)
-    vocab = build_vocab([item['Question'] for item in train_data] + [item['Answer'] for item in train_data])
-    qa_train_dataset = QA_loader(train_data, vocab)
-    qa_val_dataset = QA_loader(val_data, vocab)
-    qa_test_dataset = QA_loader(test_data, vocab)
-    return qa_val_dataset, qa_train_dataset, qa_test_dataset, vocab
+    vocabulary = build_vocab([item['Question'] for item in train_data] + [item['Answer'] for item in train_data])
+    qa_train_dataset = QA_loader(train_data, vocabulary)
+    qa_val_dataset = QA_loader(val_data, vocabulary)
+    qa_test_dataset = QA_loader(test_data, vocabulary)
+    return qa_val_dataset, qa_train_dataset, qa_test_dataset, vocabulary
