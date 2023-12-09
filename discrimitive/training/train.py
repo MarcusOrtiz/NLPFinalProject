@@ -1,15 +1,34 @@
-from discrimitive.model.TunedQA import model
-from Dataset import QA_loader
+import sys
+from ..model.SpecifiedQA import create_model
+from ..utils import open_json
+from .Dataset import QA_loader
 import torch.nn as nn
 import torch.optim as optim
 import torch
+from pathlib import Path
+from ..utils import vectorize_data
 
-# Assuming 'train_loader' is your DataLoader instance
-# 'model' is an instance of QAModel
-# 'criterion' is your loss function, and 'optimizer' is defined
+
+TRAIN_DATA_PATH = Path('./data/train_formatted_output.json').resolve()
+TRAIN_DATA_PATH = Path('./data/train_marcus.json').resolve()
+VAL_DATA_PATH = Path('./data/valid_formatted_output.json').resolve()
+VAL_DATA_PATH = Path('./data/train_marcus.json').resolve()
+TEST_DATA_PATH = Path('./data/test_formatted_output.json').resolve()
+
+
+def start_model():
+    data = open_json(TRAIN_DATA_PATH)
+
+    unique_words = set([item['Question'] for item in data] + [item['Answer'] for item in data])
+    return create_model(len(unique_words))
+
+
 def train():
-    qa_train_loader = QA_loader('../../data/train_output.json')
-    qa_val_loader = QA_loader('../../data/valid_output.json')
+    model = start_model()
+
+    questions, answers, ratings, vocab = vectorize_data(questions, answers, ratings)
+    qa_train_loader = QA_loader(TRAIN_DATA_PATH)
+    qa_val_loader = QA_loader(VAL_DATA_PATH)
 
     num_epochs = 50
     # Define the loss function and optimizer
@@ -65,3 +84,7 @@ def train():
 
         # Save the model checkpoint if needed
         # torch.save(model.state_dict(), 'model_checkpoint.pth')
+
+if __name__ == '__main__':
+    start_model()
+    train()
