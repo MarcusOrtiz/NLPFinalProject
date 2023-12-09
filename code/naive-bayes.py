@@ -8,8 +8,8 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 from sklearn.metrics import roc_curve, auc
 import matplotlib.pyplot as plt
 
-train_path = r'/workspaces/NLPFinalProject/data/train_formatted_output.json'
-test_path = r'/workspaces/NLPFinalProject/data/test_formatted_output.json'
+train_path = r'/workspaces/Questin-Answer-Rater-NLP/data/train_formatted_output.json'
+test_path = r'/workspaces/Questin-Answer-Rater-NLP/data/test_formatted_output.json'
 
 # Read the data from the JSON files
 with open(train_path, 'r') as train_file:
@@ -23,16 +23,24 @@ train_df = pd.DataFrame(train_data)
 test_df = pd.DataFrame(test_data)
 
 # Bin the 'Score' values into discrete classes
-num_bins = 5  # You can adjust the number of bins based on your preference
+num_bins = 4  # You can adjust the number of bins based on your preference
 train_df['Score'] = pd.cut(train_df['Score'], bins=num_bins, labels=False)
 test_df['Score'] = pd.cut(test_df['Score'], bins=num_bins, labels=False)
 
+unique_classes_train = train_df['Score'].unique()
 
-# Count the number of unique values in the 'Score' column
-unique_score_values = train_df['Score'].nunique()
+print(f"Number of unique classes in 'Score' (train): {unique_classes_train}")
+print("Unique classes in 'Score' (train):", unique_classes_train)
 
-# Print the result
-print("Number of unique values in 'Score':", unique_score_values)
+print(f"Number of unique classes in 'Score' (train): {unique_classes_train}")
+# print(f"Number of unique classes in 'Score' (test): {unique_classes_test}")
+
+
+# unique_score_values = train_df['Score'].nunique()
+# unique_scores = train_df['Score'].unique()
+
+# print(f"Number of unique values in 'Score': {unique_score_values}")
+# print("Unique values in 'Score':", unique_scores)
 
 # Convert 'Score' column to string type
 train_df['Score'] = train_df['Score'].astype(str)
