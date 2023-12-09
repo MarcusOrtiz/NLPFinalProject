@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
 
-INPUT_DIM = 10
+EMBEDDING_DIM = 20
 HIDDEN_DIM = 100
 HIDDEN_LAYERS = 1
 OUTPUT_DIM = 1
-EMBEDDING_DIM = 100
+INPUT_DIM = EMBEDDING_DIM
 
 class QA(nn.Module):
     def __init__(self, input_dim, hidden_dim, hidden_layers, output_dim, vocab_size, embedding_dim):
@@ -39,7 +39,8 @@ class QA(nn.Module):
         out = torch.cat((question_hidden[-1, :, :], answer_hidden[-1, :, :]), dim=1)
 
         # Index hidden state of last time step
-        out = self.fc(out[:, -1, :])
+        # out = self.fc(out[:, -1, :])
+        out = torch.cat((question_hidden[-1, :, :], answer_hidden[-1, :, :]), dim=1)
         return out
 
 def create_model(vocab_size):
