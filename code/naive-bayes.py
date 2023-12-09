@@ -27,6 +27,13 @@ num_bins = 5  # You can adjust the number of bins based on your preference
 train_df['Score'] = pd.cut(train_df['Score'], bins=num_bins, labels=False)
 test_df['Score'] = pd.cut(test_df['Score'], bins=num_bins, labels=False)
 
+
+# Count the number of unique values in the 'Score' column
+unique_score_values = train_df['Score'].nunique()
+
+# Print the result
+print("Number of unique values in 'Score':", unique_score_values)
+
 # Convert 'Score' column to string type
 train_df['Score'] = train_df['Score'].astype(str)
 test_df['Score'] = test_df['Score'].astype(str)
@@ -62,6 +69,11 @@ def find_best_alpha(X_train, y_train, X_test, y_test):
 best_alpha = find_best_alpha(X_train_bow, y_train, X_test_bow, y_test)
 classifier = MultinomialNB(alpha = best_alpha)
 classifier.fit(X_train_bow, y_train)
+
+# Probability distribution of rating categories in the train dataset
+train_rating_distribution = train_df['Score'].value_counts(normalize=True).sort_index()
+print("Probability distribution of rating categories in the train dataset:")
+print(train_rating_distribution)
 
 # Make predictions on the test set
 y_pred = classifier.predict(X_test_bow)
