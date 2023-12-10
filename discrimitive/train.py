@@ -13,19 +13,21 @@ TRAIN_DATA_NAME = 'train_formatted_output_w_comma.json'
 VAL_DATA_NAME = 'valid_formatted_output_w_comma.json'
 TEST_DATA_NAME = 'test_formatted_output_w_comma.json'
 
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 SHUFFLE = True
 EPOCHS = 40
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.005
 PATIENCE = 40
+
+PADDING_INDEX = 1
 
 
 def collate_batch(batch):
     questions, answers, scores = zip(*batch)
 
     # Pad questions and answers to have the same length within each batch
-    questions_padded = pad_sequence(questions, batch_first=True, padding_value=0)  # Assuming 0 is your padding index
-    answers_padded = pad_sequence(answers, batch_first=True, padding_value=0)
+    questions_padded = pad_sequence(questions, batch_first=True, padding_value=PADDING_INDEX)
+    answers_padded = pad_sequence(answers, batch_first=True, padding_value=PADDING_INDEX)
     scores = torch.tensor(scores, dtype=torch.float)
 
     return questions_padded, answers_padded, scores

@@ -1,17 +1,19 @@
 import torch
 import torch.nn as nn
 
-EMBEDDING_DIM = 10
-HIDDEN_DIM = 300
+EMBEDDING_DIM = 15
+HIDDEN_DIM = 80
 HIDDEN_LAYERS = 1
 OUTPUT_DIM = 1
 INPUT_DIM = EMBEDDING_DIM
+
+PADDING_INDEX = 1
 
 class QA(nn.Module):
     def __init__(self, input_dim, hidden_dim, hidden_layers, output_dim, vocab_size, embedding_dim):
         super(QA, self).__init__()
         # Input Layer
-        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.embedding = nn.Embedding(vocab_size, embedding_dim, padding_idx=PADDING_INDEX)
 
         # Hidden Layer Dimensions
         self.hidden_dim = hidden_dim

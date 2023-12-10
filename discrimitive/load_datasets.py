@@ -23,7 +23,9 @@ def build_vocab(text_iterable):
     counter = Counter()
     for text in text_iterable:
         counter.update(tokenize(text))
-    return vocab(counter, specials=['<UNK>'])
+    voc = vocab(counter, specials=['<unk>', '<pad>'])
+    voc.set_default_index(voc['<unk>'])
+    return voc
 
 
 class QA_loader(Dataset):
@@ -40,7 +42,7 @@ class QA_loader(Dataset):
         question_answer = self.data[idx]
         question = self.preprocess(question_answer['Question'])
         answer = self.preprocess(question_answer['Answer'])
-        score = torch.tensor(int(question_answer['Score']), dtype=torch.int)
+        score = torch.tensor(int(question_answer['Average']), dtype=torch.int)
         return question, answer, score
 
     def preprocess(self, text):
