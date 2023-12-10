@@ -27,7 +27,7 @@ def build_vocab(text_iterable):
 
 
 class QA_loader(Dataset):
-    def __init__(self, data, vocab, max_length=200):
+    def __init__(self, data, vocab, max_length=100):
         self.data = data
         self.vocab = vocab
         self.max_length = max_length
