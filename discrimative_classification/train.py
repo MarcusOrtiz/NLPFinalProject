@@ -12,17 +12,17 @@ from torch.utils.data import Dataset, DataLoader
 # TRAIN_DATA_NAME = 'train_formatted_output_w_comma.json'
 # VAL_DATA_NAME = 'valid_formatted_output_w_comma.json'
 # TEST_DATA_NAME = 'test_formatted_output_w_comma.json'
-TRAIN_DATA_NAME = 'unique_answers/train_data.json'
-VAL_DATA_NAME = 'unique_answers/val_data.json'
-TEST_DATA_NAME = 'unique_answers/test_data.json'
+TRAIN_DATA_NAME = 'unique_answers/train_data_classification.json'
+VAL_DATA_NAME = 'unique_answers/val_data_classification.json'
+TEST_DATA_NAME = 'unique_answers/test_data_classification.json'
 
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 SHUFFLE = True
-EPOCHS = 40
-LEARNING_RATE = 0.003
-PATIENCE = 35
+EPOCHS = 60
+LEARNING_RATE = 0.007
+PATIENCE = 45
 MOMENTUM = 0.9
-WEIGHT_DECAY = 0.01
+WEIGHT_DECAY = 0.001
 PADDING_INDEX = 1
 
 
@@ -32,7 +32,7 @@ def collate_batch(batch):
     # Pad questions and answers to have the same length within each batch
     questions_padded = pad_sequence(questions, batch_first=True, padding_value=PADDING_INDEX)
     answers_padded = pad_sequence(answers, batch_first=True, padding_value=PADDING_INDEX)
-    scores = torch.tensor(scores, dtype=torch.int)
+    scores = torch.tensor(scores, dtype=torch.long)
 
     return questions_padded, answers_padded, scores
 
@@ -59,6 +59,9 @@ def train():
             # Forward pass
             predictions = model(questions, answers)
             scores = scores
+
+            # print(torch.shape(predictions))
+            # print(torch.shape(scores))
 
             loss = loss_fn(predictions, scores)
 
@@ -88,7 +91,8 @@ def train():
                 val_accuracy += correct_predictions.sum().item()
                 total_scores += len(scores)
                 if printCount > 0:
-                    print(f'val predictions: {predictions}')
+                    print(f'probs: {predictions}')
+                    print(f'val predictions: {predicted_classes}')
                     print(f'val scores: {scores}')
                     #     print(f'val diff: {diff}')
                     #     print('loss: ', loss.item())
