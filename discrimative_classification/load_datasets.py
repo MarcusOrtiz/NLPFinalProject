@@ -25,7 +25,7 @@ def build_vocab(text_iterable):
         counter.update(tokenize(text))
     voc = vocab(counter, specials=['<unk>', '<pad>'])
     voc.set_default_index(voc['<unk>'])
-    return voc
+    return voc #instead of 
 
 
 class QA_loader(Dataset):
