@@ -6,7 +6,7 @@ import torch.nn.functional as F
 EMBEDDING_DIM = 130
 HIDDEN_DIM = 300
 HIDDEN_LAYERS = 2
-OUTPUT_DIM = 1
+OUTPUT_DIM = 4
 INPUT_DIM = EMBEDDING_DIM
 DROPOUT_OUT = 0.35
 DROPOUT_LSTM = 0.35
@@ -43,9 +43,7 @@ class QA(nn.Module):
 
         dropout_out = self.dropout(concatenated)
 
-        activated = F.relu(dropout_out)
-
-        out = self.fc(activated)
+        out = self.fc(dropout_out)
         return out
 
 def create_model(vocab_size):

@@ -32,7 +32,7 @@ def collate_batch(batch):
     # Pad questions and answers to have the same length within each batch
     questions_padded = pad_sequence(questions, batch_first=True, padding_value=PADDING_INDEX)
     answers_padded = pad_sequence(answers, batch_first=True, padding_value=PADDING_INDEX)
-    scores = torch.tensor(scores, dtype=torch.float)
+    scores = torch.tensor(scores, dtype=torch.int)
 
     return questions_padded, answers_padded, scores
 
@@ -48,7 +48,7 @@ def train():
 
     # Define the loss function and optimizer
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
-    loss_fn = nn.MSELoss()
+    loss_fn = nn.CrossEntropyLoss()
 
     best_val_loss = float('inf')
     epochs_no_improve = 0
@@ -57,15 +57,11 @@ def train():
         train_loss = 0
         for questions, answers, scores in qa_train_loader:
             # Forward pass
-            predictions = model(questions, answers).squeeze()
-            scores = scores.squeeze()
-            # print(f'train predictions: {predictions}')
-            # print(f'train scores: {scores}')
-            # Compute the loss
-            loss = loss_fn(10*predictions, 10*scores)
+            predictions = model(questions, answers)
+            scores = scores
 
-            # loss = torch.mean((2*predictions - 2*scores) ** 4 * torch.abs(2*predictions - 2*scores))
-            # loss = torch.mean((predictions - scores) ** 4) + torch.mean((predictions - scores) ** 1/4)            # Backward pass and optimization
+            loss = loss_fn(predictions, scores)
+
             optimizer.zero_grad()  # Clear existing gradients
             loss.backward()  # Backpropagation
             optimizer.step()  # Update weights
@@ -80,22 +76,16 @@ def train():
         with torch.no_grad():
             printCount = 4
             for questions, answers, scores in qa_val_loader:
-                predictions = model(questions, answers).squeeze()
-                scores = scores.squeeze()
-                # print(f'val predictions: {predictions}')
-                # print(f'val scores: {scores}')
+                predictions = model(questions, answers)
+                scores = scores
                 loss = loss_fn(predictions, scores)
-                if (torch.max(predictions) - torch.min(predictions)) < 0.3:
-                    loss += 2
 
-                # loss = torch.mean((2 * predictions - 2 * scores) ** 3 * torch.abs(2 * predictions - 2 * scores))
-                # loss = torch.mean((predictions - scores) ** 8)  # Backward pass and optimization
                 val_loss += loss.item()
 
                 # accuracy
-                diff = torch.abs(predictions - scores)
-                accurate = torch.where(diff < 0.5, torch.ones_like(diff), torch.zeros_like(diff))
-                val_accuracy += torch.sum(accurate).item()
+                _, predicted_classes = predictions.max(1)
+                correct_predictions = predicted_classes.eq(scores)
+                val_accuracy += correct_predictions.sum().item()
                 total_scores += len(scores)
                 if printCount > 0:
                     print(f'val predictions: {predictions}')
@@ -117,11 +107,11 @@ def train():
               f"Val Accuracy: {val_accuracy}")
 
         # Early Stopping
-        if val_loss < best_val_loss and epoch > 12:
+        if val_loss < best_val_loss and epoch > 0:
             best_val_loss = val_loss
             epochs_no_improve = 0
             # Save the model if it's the best so far
-            torch.save(model.state_dict(), 'best_model.pth')
+            torch.save(model.state_dict(), 'best_model_classification.pth')
         else:
             epochs_no_improve += 1
 
@@ -129,7 +119,7 @@ def train():
             print(f'Early stopping! Epoch: {epoch}')
             break
 
-    torch.save(model.state_dict(), 'model_ending_1.pth')
+    torch.save(model.state_dict(), 'model_ending_classification.pth')
 
 
 if __name__ == '__main__':
