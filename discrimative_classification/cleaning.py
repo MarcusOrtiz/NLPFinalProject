@@ -24,13 +24,13 @@ for path in [TRAIN_DATA_PATH, VAL_DATA_PATH, TEST_DATA_PATH]:
             unique_answers.add(answer)
             # Categorize the average based on specified ranges
             if 1 <= average <= 1.75:
-                pair["Average"] = 1
+                pair["Average"] = 0
             elif 1.75 < average <= 2.5:
-                pair["Average"] = 2
+                pair["Average"] = 1
             elif 2.5 < average <= 3.25:
-                pair["Average"] = 3
+                pair["Average"] = 2
             elif 3.25 < average <= 4:
-                pair["Average"] = 4
+                pair["Average"] = 3
 
             filtered_json_array.append(pair)
 
