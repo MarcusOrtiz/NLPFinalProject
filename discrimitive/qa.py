@@ -1,12 +1,15 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
-EMBEDDING_DIM = 15
-HIDDEN_DIM = 80
-HIDDEN_LAYERS = 1
+
+EMBEDDING_DIM = 200
+HIDDEN_DIM = 1200
+HIDDEN_LAYERS = 2
 OUTPUT_DIM = 1
 INPUT_DIM = EMBEDDING_DIM
-
+DROPOUT_OUT = 0.2
+DROPOUT_LSTM = 0.8
 PADDING_INDEX = 1
 
 class QA(nn.Module):
@@ -19,7 +22,11 @@ class QA(nn.Module):
         self.hidden_dim = hidden_dim
         self.hidden_layers = hidden_layers
 
-        self.lstm = nn.LSTM(input_dim, self.hidden_dim, self.hidden_layers, batch_first=True)
+        # Dropout Layer
+        self.dropout = nn.Dropout(DROPOUT_OUT)
+
+        # LSTM Layer
+        self.lstm = nn.LSTM(input_dim, self.hidden_dim, self.hidden_layers, dropout=DROPOUT_LSTM, batch_first=True)
 
         # Output Layer
         self.fc = nn.Linear(self.hidden_dim * 2, output_dim)
@@ -32,9 +39,13 @@ class QA(nn.Module):
         _, (answer_hidden, _) = self.lstm(answer_emb)
 
         # Concatenate the final hidden states of answer and question
-        out = torch.cat((question_hidden[-1, :, :], answer_hidden[-1, :, :]), dim=1)
+        concatenated = torch.cat((question_hidden[-1, :, :], answer_hidden[-1, :, :]), dim=1)
 
-        out = self.fc(out)
+        dropout_out = self.dropout(concatenated)
+
+        activated = F.relu(dropout_out)
+
+        out = self.fc(activated)
         return out
 
 def create_model(vocab_size):

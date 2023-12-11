@@ -16,12 +16,13 @@ TRAIN_DATA_NAME = 'unique_answers/train_data.json'
 VAL_DATA_NAME = 'unique_answers/val_data.json'
 TEST_DATA_NAME = 'unique_answers/test_data.json'
 
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 SHUFFLE = True
 EPOCHS = 40
-LEARNING_RATE = 0.05
+LEARNING_RATE = 0.01
 PATIENCE = 40
-
+MOMENTUM = 0.9
+WEIGHT_DECAY = 0.002
 PADDING_INDEX = 1
 
 
@@ -46,8 +47,8 @@ def train():
     qa_test_loader = DataLoader(test_data, batch_size=BATCH_SIZE, shuffle=False, collate_fn=collate_batch)
 
     # Define the loss function and optimizer
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    loss_fn = nn.HuberLoss()
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
+    loss_fn = nn.MSELoss()
 
     best_val_loss = float('inf')
     epochs_no_improve = 0
@@ -61,8 +62,8 @@ def train():
             # print(f'train scores: {scores}')
             # Compute the loss
             loss = loss_fn(predictions, scores)
-
-            # Backward pass and optimization
+            # loss = torch.mean((2*predictions - 2*scores) ** 4 * torch.abs(2*predictions - 2*scores))
+            # loss = torch.mean((predictions - scores) ** 4) + torch.mean((predictions - scores) ** 1/4)            # Backward pass and optimization
             optimizer.zero_grad()  # Clear existing gradients
             loss.backward()  # Backpropagation
             optimizer.step()  # Update weights
@@ -75,12 +76,14 @@ def train():
         val_loss = 0
         total_scores = 0
         with torch.no_grad():
-            printCount = 10
-            for questions, answers, scores in qa_test_loader:
+            printCount = 4
+            for questions, answers, scores in qa_val_loader:
                 predictions = model(questions, answers).squeeze()
                 # print(f'val predictions: {predictions}')
                 # print(f'val scores: {scores}')
                 loss = loss_fn(predictions, scores)
+                # loss = torch.mean((2 * predictions - 2 * scores) ** 3 * torch.abs(2 * predictions - 2 * scores))
+                # loss = torch.mean((predictions - scores) ** 8)  # Backward pass and optimization
                 val_loss += loss.item()
 
                 # accuracy
@@ -89,8 +92,8 @@ def train():
                 val_accuracy += torch.sum(accurate).item()
                 total_scores += len(scores)
                 if printCount > 0:
-                #     print(f'val predictions: {predictions}')
-                #     print(f'val scores: {scores}')
+                    print(f'val predictions: {predictions}')
+                    print(f'val scores: {scores}')
                 #     print(f'val diff: {diff}')
                 #     print('loss: ', loss.item())
                 #     print('val loss: ', val_loss)
@@ -99,7 +102,7 @@ def train():
                 #     print(f'val total_scores: {total_scores}')
                     printCount -= 1
 
-        val_loss = val_loss / len(qa_test_loader)
+        val_loss = val_loss / len(qa_val_loader)
         val_accuracy = val_accuracy / total_scores
 
         # Print statistics

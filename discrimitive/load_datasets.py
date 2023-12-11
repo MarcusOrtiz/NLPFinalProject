@@ -42,7 +42,7 @@ class QA_loader(Dataset):
         question_answer = self.data[idx]
         question = self.preprocess(question_answer['Question'])
         answer = self.preprocess(question_answer['Answer'])
-        score = torch.tensor(int(question_answer['Average']), dtype=torch.int)
+        score = torch.tensor(question_answer['Average'], dtype=torch.float)
         return question, answer, score
 
     def preprocess(self, text):
