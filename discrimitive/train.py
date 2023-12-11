@@ -16,12 +16,13 @@ TRAIN_DATA_NAME = 'unique_answers/train_data.json'
 VAL_DATA_NAME = 'unique_answers/val_data.json'
 TEST_DATA_NAME = 'unique_answers/test_data.json'
 
-BATCH_SIZE = 64
+BATCH_SIZE = 16
 SHUFFLE = True
 EPOCHS = 40
-LEARNING_RATE = 0.05
-PATIENCE = 40
-
+LEARNING_RATE = 0.003
+PATIENCE = 35
+MOMENTUM = 0.9
+WEIGHT_DECAY = 0.01
 PADDING_INDEX = 1
 
 
@@ -46,8 +47,8 @@ def train():
     qa_test_loader = DataLoader(test_data, batch_size=BATCH_SIZE, shuffle=False, collate_fn=collate_batch)
 
     # Define the loss function and optimizer
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    loss_fn = nn.HuberLoss()
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
+    loss_fn = nn.MSELoss()
 
     best_val_loss = float('inf')
     epochs_no_improve = 0
@@ -57,12 +58,14 @@ def train():
         for questions, answers, scores in qa_train_loader:
             # Forward pass
             predictions = model(questions, answers).squeeze()
+            scores = scores.squeeze()
             # print(f'train predictions: {predictions}')
             # print(f'train scores: {scores}')
             # Compute the loss
-            loss = loss_fn(predictions, scores)
+            loss = loss_fn(10*predictions, 10*scores)
 
-            # Backward pass and optimization
+            # loss = torch.mean((2*predictions - 2*scores) ** 4 * torch.abs(2*predictions - 2*scores))
+            # loss = torch.mean((predictions - scores) ** 4) + torch.mean((predictions - scores) ** 1/4)            # Backward pass and optimization
             optimizer.zero_grad()  # Clear existing gradients
             loss.backward()  # Backpropagation
             optimizer.step()  # Update weights
@@ -75,12 +78,18 @@ def train():
         val_loss = 0
         total_scores = 0
         with torch.no_grad():
-            printCount = 10
-            for questions, answers, scores in qa_test_loader:
+            printCount = 4
+            for questions, answers, scores in qa_val_loader:
                 predictions = model(questions, answers).squeeze()
+                scores = scores.squeeze()
                 # print(f'val predictions: {predictions}')
                 # print(f'val scores: {scores}')
                 loss = loss_fn(predictions, scores)
+                if (torch.max(predictions) - torch.min(predictions)) < 0.3:
+                    loss += 2
+
+                # loss = torch.mean((2 * predictions - 2 * scores) ** 3 * torch.abs(2 * predictions - 2 * scores))
+                # loss = torch.mean((predictions - scores) ** 8)  # Backward pass and optimization
                 val_loss += loss.item()
 
                 # accuracy
@@ -89,17 +98,17 @@ def train():
                 val_accuracy += torch.sum(accurate).item()
                 total_scores += len(scores)
                 if printCount > 0:
-                #     print(f'val predictions: {predictions}')
-                #     print(f'val scores: {scores}')
-                #     print(f'val diff: {diff}')
-                #     print('loss: ', loss.item())
-                #     print('val loss: ', val_loss)
-                #     print(f'val accurate: {accurate}')
-                #     print(f'val accuracy: {val_accuracy}')
-                #     print(f'val total_scores: {total_scores}')
+                    print(f'val predictions: {predictions}')
+                    print(f'val scores: {scores}')
+                    #     print(f'val diff: {diff}')
+                    #     print('loss: ', loss.item())
+                    #     print('val loss: ', val_loss)
+                    #     print(f'val accurate: {accurate}')
+                    #     print(f'val accuracy: {val_accuracy}')
+                    #     print(f'val total_scores: {total_scores}')
                     printCount -= 1
 
-        val_loss = val_loss / len(qa_test_loader)
+        val_loss = val_loss / len(qa_val_loader)
         val_accuracy = val_accuracy / total_scores
 
         # Print statistics
@@ -108,7 +117,7 @@ def train():
               f"Val Accuracy: {val_accuracy}")
 
         # Early Stopping
-        if val_loss < best_val_loss:
+        if val_loss < best_val_loss and epoch > 12:
             best_val_loss = val_loss
             epochs_no_improve = 0
             # Save the model if it's the best so far
