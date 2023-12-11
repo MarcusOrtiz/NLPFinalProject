@@ -18,9 +18,20 @@ for path in [TRAIN_DATA_PATH, VAL_DATA_PATH, TEST_DATA_PATH]:
 
     for pair in data:
         answer = pair.get("Answer")
-        # print(f'answer: {answer}')
+        average = pair.get("Average")
+
         if answer not in unique_answers:
             unique_answers.add(answer)
+            # Categorize the average based on specified ranges
+            if 1 <= average <= 1.75:
+                pair["Average"] = 1
+            elif 1.75 < average <= 2.5:
+                pair["Average"] = 2
+            elif 2.5 < average <= 3.25:
+                pair["Average"] = 3
+            elif 3.25 < average <= 4:
+                pair["Average"] = 4
+
             filtered_json_array.append(pair)
 
     print(f'path: {path}')
@@ -35,3 +46,4 @@ for path in [TRAIN_DATA_PATH, VAL_DATA_PATH, TEST_DATA_PATH]:
     elif path == TEST_DATA_PATH:
         with open(NEW_TEST_DATA_PATH, 'w') as file:
             json.dump(filtered_json_array, file)
+
