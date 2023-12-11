@@ -3,13 +3,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-EMBEDDING_DIM = 200
-HIDDEN_DIM = 1200
+EMBEDDING_DIM = 130
+HIDDEN_DIM = 300
 HIDDEN_LAYERS = 2
 OUTPUT_DIM = 1
 INPUT_DIM = EMBEDDING_DIM
-DROPOUT_OUT = 0.2
-DROPOUT_LSTM = 0.8
+DROPOUT_OUT = 0.35
+DROPOUT_LSTM = 0.35
 PADDING_INDEX = 1
 
 class QA(nn.Module):
@@ -22,11 +22,11 @@ class QA(nn.Module):
         self.hidden_dim = hidden_dim
         self.hidden_layers = hidden_layers
 
+        # LSTM Layer
+        self.lstm_question = nn.LSTM(input_dim, self.hidden_dim, self.hidden_layers, dropout=DROPOUT_LSTM, batch_first=True)
+        self.lstm_answer = nn.LSTM(input_dim, self.hidden_dim, self.hidden_layers, dropout=DROPOUT_LSTM, batch_first=True)
         # Dropout Layer
         self.dropout = nn.Dropout(DROPOUT_OUT)
-
-        # LSTM Layer
-        self.lstm = nn.LSTM(input_dim, self.hidden_dim, self.hidden_layers, dropout=DROPOUT_LSTM, batch_first=True)
 
         # Output Layer
         self.fc = nn.Linear(self.hidden_dim * 2, output_dim)
@@ -35,8 +35,8 @@ class QA(nn.Module):
         question_emb = self.embedding(question)
         answer_emb = self.embedding(answer)
 
-        _, (question_hidden, _) = self.lstm(question_emb)
-        _, (answer_hidden, _) = self.lstm(answer_emb)
+        _, (question_hidden, _) = self.lstm_question(question_emb)
+        _, (answer_hidden, _) = self.lstm_answer(answer_emb)
 
         # Concatenate the final hidden states of answer and question
         concatenated = torch.cat((question_hidden[-1, :, :], answer_hidden[-1, :, :]), dim=1)
