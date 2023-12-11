@@ -94,7 +94,18 @@ def train():
 
                 # accuracy
                 diff = torch.abs(predictions - scores)
-                accurate = torch.where(diff < 0.5, torch.ones_like(diff), torch.zeros_like(diff))
+
+                accurate = 0
+                if predictions in (1-1.75):
+                    accurate = 1
+                if predictions in (1.75 - 2.5):
+                    accurate = 1
+                if predictions in (2.5 - 3.5):
+                    accurate = 1
+                if predictions in (3.5 - 4):
+                    accurate = 1
+                
+                # accurate = torch.where(diff < 0.5, torch.ones_like(diff), torch.zeros_like(diff))
                 val_accuracy += torch.sum(accurate).item()
                 total_scores += len(scores)
                 if printCount > 0:
