@@ -6,9 +6,9 @@ TRAIN_DATA_PATH = 'train_formatted_output_w_comma.json'
 VAL_DATA_PATH = 'valid_formatted_output_w_comma.json'
 TEST_DATA_PATH = 'test_formatted_output_w_comma.json'
 
-NEW_TRAIN_DATA_PATH = Path('./data/unique_answers/train_data.json').resolve()
-NEW_VAL_DATA_PATH = Path('./data/unique_answers/val_data.json').resolve()
-NEW_TEST_DATA_PATH = Path('./data/unique_answers/test_data.json').resolve()
+NEW_TRAIN_DATA_PATH = Path('./data/unique_answers/train_data_classification.json').resolve()
+NEW_VAL_DATA_PATH = Path('./data/unique_answers/val_data_classification.json').resolve()
+NEW_TEST_DATA_PATH = Path('./data/unique_answers/test_data_classification.json').resolve()
 
 for path in [TRAIN_DATA_PATH, VAL_DATA_PATH, TEST_DATA_PATH]:
     data = open_json(path)
@@ -46,4 +46,3 @@ for path in [TRAIN_DATA_PATH, VAL_DATA_PATH, TEST_DATA_PATH]:
     elif path == TEST_DATA_PATH:
         with open(NEW_TEST_DATA_PATH, 'w') as file:
             json.dump(filtered_json_array, file)
-
