@@ -5,6 +5,10 @@ from .load_datasets import load_datasets
 from torch.nn.utils.rnn import pad_sequence
 from .qa import create_model
 from torch.utils.data import Dataset, DataLoader
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+import matplotlib.pyplot as plt
+import numpy as np
+import math
 
 # TRAIN_DATA_NAME = 'train_marcus.json'
 # VAL_DATA_NAME = 'train_marcus.json'
@@ -12,9 +16,9 @@ from torch.utils.data import Dataset, DataLoader
 # TRAIN_DATA_NAME = 'train_formatted_output_w_comma.json'
 # VAL_DATA_NAME = 'valid_formatted_output_w_comma.json'
 # TEST_DATA_NAME = 'test_formatted_output_w_comma.json'
-TRAIN_DATA_NAME = 'unique_answers/train_data.json'
-VAL_DATA_NAME = 'unique_answers/val_data.json'
-TEST_DATA_NAME = 'unique_answers/test_data.json'
+TRAIN_DATA_NAME = 'unique_answers/train_data_classification.json'
+VAL_DATA_NAME = 'unique_answers/val_data_classification.json'
+TEST_DATA_NAME = 'unique_answers/test_data_classification.json'
 
 BATCH_SIZE = 16
 SHUFFLE = True
@@ -36,6 +40,20 @@ def collate_batch(batch):
 
     return questions_padded, answers_padded, scores
 
+def batch_correct(predictions, scores):
+    total_correct = 0
+    for i in range(len(scores)):
+        if scores[i] == 0 and 0 <= predictions[i] < 0.75:
+            total_correct += 1
+        elif scores[i] == 1 and 0.75 <= predictions[i] < 1.5:
+            total_correct += 1
+        elif scores[i] == 2 and 1.5 <= predictions[i] < 2.25:
+            total_correct += 1
+        elif scores[i] == 3 and 2.25 <= predictions[i] <= 3:
+            total_correct += 1
+
+    return total_correct
+
 
 def train():
     train_data, val_data, test_data, vocab = load_datasets(TRAIN_DATA_NAME, VAL_DATA_NAME, TEST_DATA_NAME)
@@ -50,6 +68,7 @@ def train():
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
     loss_fn = nn.MSELoss()
 
+    ### TRAINING ###
     best_val_loss = float('inf')
     epochs_no_improve = 0
     for epoch in range(EPOCHS):
@@ -73,6 +92,7 @@ def train():
 
         train_loss = train_loss / len(qa_train_loader)
 
+        ### VALIDATION ###
         model.eval()
         val_accuracy = 0
         val_loss = 0
@@ -85,27 +105,13 @@ def train():
                 # print(f'val predictions: {predictions}')
                 # print(f'val scores: {scores}')
                 loss = loss_fn(predictions, scores)
-                if (torch.max(predictions) - torch.min(predictions)) < 0.3:
-                    loss += 2
 
                 # loss = torch.mean((2 * predictions - 2 * scores) ** 3 * torch.abs(2 * predictions - 2 * scores))
                 # loss = torch.mean((predictions - scores) ** 8)  # Backward pass and optimization
                 val_loss += loss.item()
 
                 # accuracy
-                # diff = torch.abs(predictions - scores)
-                # accurate = torch.where(diff < 0.5, torch.ones_like(diff), torch.zeros_like(diff))
-                # val_accuracy += torch.sum(accurate).item()
-                for i in range(len(predictions)):
-                    if scores[i] == 1 and 1 <= predictions[i] < 1.75:
-                        val_accuracy += 1
-                    elif scores[i] == 2 and 1.75 <= predictions[i] < 2.5:
-                        val_accuracy += 1
-                    elif scores[i] == 3 and 2.5 <= predictions[i] < 3.25:
-                        val_accuracy += 1
-                    elif scores[i] == 4 and 3.25 <= predictions[i] <= 4:
-                        val_accuracy += 1
-
+                val_accuracy += batch_correct(predictions, scores)
                 total_scores += len(scores)
                 if printCount > 0:
                     print(f'val predictions: {predictions}')
@@ -139,7 +145,37 @@ def train():
             print(f'Early stopping! Epoch: {epoch}')
             break
 
+
+        ### TEST ###
+        all_labels = []
+        all_predictions = []
+        for questions, answers, scores in qa_test_loader:
+            predictions = model(questions, answers)
+            all_labels.extend(scores.tolist())
+            all_predictions.extend(predictions.squeeze().tolist())
+
+        # Convert to numpy arrays
+        all_labels = np.array(all_labels)
+        all_predictions = np.array(all_predictions)
+
+        # Calculate metrics
+        mse = mean_squared_error(all_labels, all_predictions)
+        rmse = math.sqrt(mse)
+        mae = mean_absolute_error(all_labels, all_predictions)
+        print(f"MSE: {mse}, RMSE: {rmse}, MAE: {mae}")
+
+        # Plotting Predictions vs Actuals
+        plt.scatter(all_labels, all_predictions, alpha=0.5)
+        plt.title('Predictions vs Actuals')
+        plt.xlabel('Actual Scores')
+        plt.ylabel('Predicted Scores')
+        plt.show()
+
+
+
+
     torch.save(model.state_dict(), 'model_ending_1.pth')
+
 
 
 if __name__ == '__main__':

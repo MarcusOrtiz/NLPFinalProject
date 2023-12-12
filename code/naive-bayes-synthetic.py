@@ -12,6 +12,7 @@ from sklearn.metrics import f1_score
 
 train_path = r'/workspaces/NLPFinalProject/data/train_formatted_output.json'
 test_path = r'/workspaces/NLPFinalProject/data/test_formatted_output.json'
+valid_path = r'/workspaces/NLPFinalProject/data/valid_formatted_output.json'
 
 # Read the data from the JSON files
 with open(train_path, 'r') as train_file:
@@ -20,12 +21,16 @@ with open(train_path, 'r') as train_file:
 with open(test_path, 'r') as test_file:
     test_data = [json.loads(line) for line in test_file]
 
+with open(test_path, 'r') as valid_file:
+    valid_data = [json.loads(line) for line in valid_file]
+
 # Create DataFrames from the lists of dictionaries
 train_df = pd.DataFrame(train_data)
 test_df = pd.DataFrame(test_data)
+valid_df = pd.DataFrame(valid_data)
 
 # Combine the two datasets
-final_df = pd.concat([train_df, test_df], ignore_index=True)
+final_df = pd.concat([train_df, test_df, valid_df], ignore_index=True)
 
 # # Print the combined dataset
 # print("Combined Dataset:")
