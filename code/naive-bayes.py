@@ -8,8 +8,8 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 from sklearn.metrics import roc_curve, auc
 import matplotlib.pyplot as plt
 
-train_path = r'/workspaces/Questin-Answer-Rater-NLP/data/train_formatted_output.json'
-test_path = r'/workspaces/Questin-Answer-Rater-NLP/data/test_formatted_output.json'
+train_path = r'/workspaces/NLPFinalProject/data/train_formatted_output.json'
+test_path = r'/workspaces/NLPFinalProject/data/test_formatted_output.json'
 
 # Read the data from the JSON files
 with open(train_path, 'r') as train_file:

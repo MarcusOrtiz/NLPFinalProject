@@ -40,7 +40,7 @@ final_df = pd.concat([train_df, test_df, valid_df], ignore_index=True)
 final_df['Combined_Text'] = final_df['Question'] + ' ' + final_df['Answer']
 
 # Given probability distribution for labels
-label_probs = [0.326709, 0.176647, 0.0, 0.178767, 0.317877]
+label_probs = [0.326709, 0.176647, 0.178767, 0.317877]
 labels = np.arange(len(label_probs))
 
 # Use CountVectorizer to create a bag-of-words representation
@@ -89,11 +89,11 @@ for _ in range(num_samples):
 
 # Save the generated data to a CSV file
 synthetic_data_df = pd.DataFrame(generated_data)
-synthetic_data_df.to_csv('/workspaces/NLPFinalProject/data/synthetic_data_NB.csv', index=False)
+synthetic_data_df.to_csv('/workspaces/NLPFinalProject/data/synthetic_data_full.csv', index=False)
 print("Synthetic data saved to synthetic_data_NB.csv")
 
 # Load the synthetic data from the CSV file
-synthetic_data_path = '/workspaces/NLPFinalProject/data/synthetic_data_NB.csv'
+synthetic_data_path = '/workspaces/NLPFinalProject/data/synthetic_data_full.csv'
 synthetic_data = pd.read_csv(synthetic_data_path)
 
 # Split the data into features (X) and labels (y)
