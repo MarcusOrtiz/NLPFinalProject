@@ -96,13 +96,13 @@ def train():
                 diff = torch.abs(predictions - scores)
 
                 accurate = 0
-                if predictions in (1-1.75):
+                if predictions in (1 - 1.75) and scores == 1:
                     accurate = 1
-                if predictions in (1.75 - 2.5):
+                if predictions in (1.75 - 2.5) and scores == 2:
                     accurate = 1
-                if predictions in (2.5 - 3.5):
+                if predictions in (2.5 - 3.5) and scores == 3:
                     accurate = 1
-                if predictions in (3.5 - 4):
+                if predictions in (3.5 - 4) and scores == 4:
                     accurate = 1
                 
                 # accurate = torch.where(diff < 0.5, torch.ones_like(diff), torch.zeros_like(diff))
