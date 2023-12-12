@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 # Load the synthetic data from the CSV file
-synthetic_data_path = '/workspaces/NLPFinalProject/code/synthetic/synthetic_data_NB.csv'
+synthetic_data_path = '/workspaces/NLPFinalProject/data/synthetic_data_full.csv'
 synthetic_data = pd.read_csv(synthetic_data_path)
 
 # Split the data into train, test, and validation sets
