@@ -9,4 +9,4 @@ For detailed dependencies required to run the code, please refer to requirements
 
 ## Note
 To be able to run the code, please use the command 
-python3 -m <foldername>.<filename>
+python3 -m "<foldername>"."<filename>"
