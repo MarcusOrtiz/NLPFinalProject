@@ -16,9 +16,9 @@ import math
 # TRAIN_DATA_NAME = 'train_formatted_output_w_comma.json'
 # VAL_DATA_NAME = 'valid_formatted_output_w_comma.json'
 # TEST_DATA_NAME = 'test_formatted_output_w_comma.json'
-TRAIN_DATA_NAME = 'unique_answers/train_data_classification.json'
-VAL_DATA_NAME = 'unique_answers/val_data_classification.json'
-TEST_DATA_NAME = 'unique_answers/test_data_classification.json'
+TRAIN_DATA_NAME = 'unique_answers/train_data.json'
+VAL_DATA_NAME = 'unique_answers/val_data.json'
+TEST_DATA_NAME = 'unique_answers/test_data.json'
 
 BATCH_SIZE = 16
 SHUFFLE = True
@@ -43,14 +43,15 @@ def collate_batch(batch):
 def batch_correct(predictions, scores):
     total_correct = 0
     for i in range(len(scores)):
-        if scores[i] == 0 and 0 <= predictions[i] < 0.75:
+        if 1 <= scores[i] < 1.75 and 1 <= predictions[i] < 1.75:
             total_correct += 1
-        elif scores[i] == 1 and 0.75 <= predictions[i] < 1.5:
+        elif 1.75 <= scores[i] < 2.5 and 1.75 <= predictions[i] < 2.5:
             total_correct += 1
-        elif scores[i] == 2 and 1.5 <= predictions[i] < 2.25:
+        elif 2.5 <= scores[i] < 3.25 and 2.5 <= predictions[i] < 3.25:
             total_correct += 1
-        elif scores[i] == 3 and 2.25 <= predictions[i] <= 3:
+        elif 3.25 <= scores[i] < 4 and 3.25 <= predictions[i] < 4:
             total_correct += 1
+
 
     return total_correct
 
@@ -137,7 +138,7 @@ def train():
             best_val_loss = val_loss
             epochs_no_improve = 0
             # Save the model if it's the best so far
-            torch.save(model.state_dict(), 'best_model.pth')
+            torch.save(model.state_dict(), 'best_model_2.pth')
         else:
             epochs_no_improve += 1
 
@@ -146,30 +147,30 @@ def train():
             break
 
 
-        ### TEST ###
-        all_labels = []
-        all_predictions = []
-        for questions, answers, scores in qa_test_loader:
-            predictions = model(questions, answers)
-            all_labels.extend(scores.tolist())
-            all_predictions.extend(predictions.squeeze().tolist())
-
-        # Convert to numpy arrays
-        all_labels = np.array(all_labels)
-        all_predictions = np.array(all_predictions)
-
-        # Calculate metrics
-        mse = mean_squared_error(all_labels, all_predictions)
-        rmse = math.sqrt(mse)
-        mae = mean_absolute_error(all_labels, all_predictions)
-        print(f"MSE: {mse}, RMSE: {rmse}, MAE: {mae}")
-
-        # Plotting Predictions vs Actuals
-        plt.scatter(all_labels, all_predictions, alpha=0.5)
-        plt.title('Predictions vs Actuals')
-        plt.xlabel('Actual Scores')
-        plt.ylabel('Predicted Scores')
-        plt.show()
+        # ### TEST ###
+        # all_labels = []
+        # all_predictions = []
+        # for questions, answers, scores in qa_test_loader:
+        #     predictions = model(questions, answers)
+        #     all_labels.extend(scores.tolist())
+        #     all_predictions.extend(predictions.squeeze().tolist())
+        #
+        # # Convert to numpy arrays
+        # all_labels = np.array(all_labels)
+        # all_predictions = np.array(all_predictions)
+        #
+        # # Calculate metrics
+        # mse = mean_squared_error(all_labels, all_predictions)
+        # rmse = math.sqrt(mse)
+        # mae = mean_absolute_error(all_labels, all_predictions)
+        # print(f"MSE: {mse}, RMSE: {rmse}, MAE: {mae}")
+        #
+        # # Plotting Predictions vs Actuals
+        # plt.scatter(all_labels, all_predictions, alpha=0.5)
+        # plt.title('Predictions vs Actuals')
+        # plt.xlabel('Actual Scores')
+        # plt.ylabel('Predicted Scores')
+        # plt.show()
 
 
 

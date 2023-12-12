@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+from pathlib import Path
 from .train import collate_batch
 from .load_datasets import load_datasets
 from .qa import create_model
@@ -12,8 +12,10 @@ from torch.nn.utils.rnn import pad_sequence
 import numpy as np
 
 # Constants
-MODEL_PATH = 'path/to/your/saved_model.pth'
-TEST_DATA_NAME = 'path/to/your/test_data.json'
+MODEL_PATH = Path('./best_model_classification.pth').resolve()
+TRAIN_DATA_NAME = 'unique_answers/train_data_classification.json'
+VAL_DATA_NAME = 'unique_answers/val_data_classification.json'
+TEST_DATA_NAME = 'unique_answers/test_data_classification.json'
 BATCH_SIZE = 16
 PADDING_INDEX = 1
 

@@ -12,14 +12,14 @@ from torch.utils.data import Dataset, DataLoader
 # TRAIN_DATA_NAME = 'train_formatted_output_w_comma.json'
 # VAL_DATA_NAME = 'valid_formatted_output_w_comma.json'
 # TEST_DATA_NAME = 'test_formatted_output_w_comma.json'
-TRAIN_DATA_NAME = 'unique_answers/train_data_classification.json'
+TRAIN_DATA_NAME = './code/unique_answers/train_data_classification.json'
 VAL_DATA_NAME = 'unique_answers/val_data_classification.json'
 TEST_DATA_NAME = 'unique_answers/test_data_classification.json'
 
 BATCH_SIZE = 32
 SHUFFLE = True
-EPOCHS = 60
-LEARNING_RATE = 0.007
+EPOCHS = 30
+LEARNING_RATE = 0.005
 PATIENCE = 45
 MOMENTUM = 0.9
 WEIGHT_DECAY = 0.001
@@ -50,7 +50,7 @@ def train():
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
     loss_fn = nn.CrossEntropyLoss()
 
-    best_val_loss = float('inf')
+    best_val_accuracy = float('-inf')
     epochs_no_improve = 0
     for epoch in range(EPOCHS):
         model.train()
@@ -90,6 +90,10 @@ def train():
                 correct_predictions = predicted_classes.eq(scores)
                 val_accuracy += correct_predictions.sum().item()
                 total_scores += len(scores)
+
+                # classes = (0, 1, 2, 3)
+                # for cls in classes:
+                #     if cls not in predicted_classes: loss += 10
                 if printCount > 0:
                     print(f'probs: {predictions}')
                     print(f'val predictions: {predicted_classes}')
@@ -111,8 +115,8 @@ def train():
               f"Val Accuracy: {val_accuracy}")
 
         # Early Stopping
-        if val_loss < best_val_loss and epoch > 0:
-            best_val_loss = val_loss
+        if val_accuracy > best_val_accuracy and epoch > 0 and val_accuracy > 0.3:
+            best_val_accuracy = val_accuracy
             epochs_no_improve = 0
             # Save the model if it's the best so far
             torch.save(model.state_dict(), 'best_model_classification.pth')

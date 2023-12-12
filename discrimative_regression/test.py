@@ -10,10 +10,10 @@ from pathlib import Path
 import math
 
 # Constants
-MODEL_PATH = Path('./best_model.pth').resolve()
-TRAIN_DATA_NAME = 'unique_answers/train_data_classification.json'
-VAL_DATA_NAME = 'unique_answers/val_data_classification.json'
-TEST_DATA_NAME = 'unique_answers/test_data_classification.json'
+MODEL_PATH = Path('./model_ending_1.pth').resolve()
+TRAIN_DATA_NAME = 'unique_answers/train_data.json'
+VAL_DATA_NAME = 'unique_answers/val_data.json'
+TEST_DATA_NAME = 'unique_answers/test_data.json'
 BATCH_SIZE = 32
 
 
@@ -34,6 +34,15 @@ all_predictions = []
 with torch.no_grad():
     for questions, answers, scores in test_loader:
         predictions = model(questions, answers)
+        for i in range(len(scores)):
+            if 1 <= scores[i] < 1.75:
+                scores[i] = 1
+            elif 1.75 <= scores[i] < 2.5:
+                scores[i] = 2
+            elif 2.5 <= scores[i] < 3.25:
+                scores[i] = 3
+            elif 3.25 <= scores[i] < 4:
+                scores[i] = 4
         all_labels.extend(scores.tolist())
         all_predictions.extend(predictions.squeeze().tolist())
 
