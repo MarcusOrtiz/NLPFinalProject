@@ -12,9 +12,13 @@ from torch.utils.data import Dataset, DataLoader
 # TRAIN_DATA_NAME = 'train_formatted_output_w_comma.json'
 # VAL_DATA_NAME = 'valid_formatted_output_w_comma.json'
 # TEST_DATA_NAME = 'test_formatted_output_w_comma.json'
-TRAIN_DATA_NAME = './code/unique_answers/train_data_classification.json'
-VAL_DATA_NAME = 'unique_answers/val_data_classification.json'
-TEST_DATA_NAME = 'unique_answers/test_data_classification.json'
+# TRAIN_DATA_NAME = 'unique_answers/train_data_classification.json'
+# VAL_DATA_NAME = 'unique_answers/val_data_classification.json'
+# TEST_DATA_NAME = 'unique_answers/test_data_classification.json'
+TRAIN_DATA_NAME = '../code/synthetic/train_s.json'
+VAL_DATA_NAME = '../code/synthetic/valid_s.json'
+TEST_DATA_NAME = '../code/synthetic/test_s.json'
+
 
 BATCH_SIZE = 32
 SHUFFLE = True
